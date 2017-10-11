@@ -1,6 +1,6 @@
 ---
 title: "STAT/MATH 495: Problem Set 05"
-author: "WRITE YOUR NAME HERE"
+author: "Luke Haggerty"
 date: "2017-10-11"
 output:
   html_document:
@@ -21,6 +21,7 @@ set.seed(76)
 
 # Load packages
 library(tidyverse)
+library(car)
 
 # Note the relative file path, and not absolute file path:
 train <- read_csv("data/train.csv")
@@ -31,27 +32,50 @@ sample_submission <- read_csv("data/sampleSubmission.csv")
 
 # Collaboration
 
-Please indicate who you collaborated with on this assignment:
+Please indicate who you collaborated with on this assignment: I worked individually.
 
 
 # Exploratory Data Analysis
 
 Information on the competition can be found [here](https://www.kaggle.com/c/bike-sharing-demand).
 
+Here I use the cor() function to examine the individual corelations between count and each predictor variable. The variables with the highest corelations to count are temp, atemp, and humidity.
 ```{r}
+cor(train$count, train$season)
+cor(train$count, train$holiday)
+cor(train$count, train$workingday)
+cor(train$count, train$weather)
+cor(train$count, train$temp)
+cor(train$count, train$atemp)
+cor(train$count, train$humidity)
+cor(train$count, train$windspeed)
+```
+
+Using the variables with the highest corelations to count, I fit a linear model. However, I use the vif() function in the car package to examine the VIF, or Variance Inflation Factor of the variables in the model. The rule of thumb is that a VIF of 5 or greater means that the variable has too much multicollinearity with another variable in the model. This means that the inclusion of the variable(s) in my model are redundant. With the first model, using temp, atemp, and humidity, both temp and atemp have very high VIF's. This seems logical to me, as temperature (temp) and the "feels like" temperature (atemp) will be very closely related. So I fit a new model, replacing the temp variable with the variable with the next highest corelation to count, windspeed. The VIF's of the variables in the new model seem fine.
+```{r}
+model1 <- lm(count ~ temp + atemp + humidity, data = train)
+vif(model1)
+
+model2 <- lm(count ~ windspeed + atemp + humidity, data = train)
+vif(model2)
+
 
 ```
 
 
 # Model Fit
-
+Here I fit the second model to the test data. I rename .fitted to count for the submission set.
 ```{r}
+model_fit <- model2 %>% 
+    broom::augment(newdata=test)
 
+model_fit <- rename(model_fit, count = .fitted)
 ```
 
 
 # Create Submission File
-
+I create a dataset with only the datetime variable and the count variable from the fitted model on the test set.
 ```{r}
-
+submission <- dplyr::select(model_fit, datetime, count)
+write.csv(submission, "submission.csv")
 ```
