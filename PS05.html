@@ -268,7 +268,7 @@ model_fit &lt;- rename(model_fit, count = .fitted)</code></pre>
 <h1>Create Submission File</h1>
 <p>I create a dataset with only the datetime variable and the count variable from the fitted model on the test set.</p>
 <pre class="r"><code>submission &lt;- dplyr::select(model_fit, datetime, count)
-write.csv(submission, &quot;submission.csv&quot;)</code></pre>
+write.csv(submission, &quot;submission.csv&quot;, row.names = FALSE)</code></pre>
 </div>
 
 
