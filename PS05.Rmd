@@ -64,12 +64,17 @@ vif(model2)
 
 
 # Model Fit
-Here I fit the second model to the test data. I rename .fitted to count for the submission set.
+Here I fit the second model to the test data. I rename .fitted to count for the submission set. Because Kaggle will not accept negative values for count, I changed all negative values of count to zero. (A negative count for bike shares does not make sense, so I interpret this as there being zero bike shares.)
 ```{r}
 model_fit <- model2 %>% 
     broom::augment(newdata=test)
 
 model_fit <- rename(model_fit, count = .fitted)
+for(i in 1:6493){
+  if(model_fit$count[i] < 0){
+    model_fit$count[i] = 0
+  }
+}
 ```
 
 

@@ -258,11 +258,16 @@ vif(model2)</code></pre>
 </div>
 <div id="model-fit" class="section level1">
 <h1>Model Fit</h1>
-<p>Here I fit the second model to the test data. I rename .fitted to count for the submission set.</p>
+<p>Here I fit the second model to the test data. I rename .fitted to count for the submission set. Because Kaggle will not accept negative values for count, I changed all negative values of count to zero. (A negative count for bike shares does not make sense, so I interpret this as there being zero bike shares.)</p>
 <pre class="r"><code>model_fit &lt;- model2 %&gt;% 
     broom::augment(newdata=test)
 
-model_fit &lt;- rename(model_fit, count = .fitted)</code></pre>
+model_fit &lt;- rename(model_fit, count = .fitted)
+for(i in 1:6493){
+  if(model_fit$count[i] &lt; 0){
+    model_fit$count[i] = 0
+  }
+}</code></pre>
 </div>
 <div id="create-submission-file" class="section level1">
 <h1>Create Submission File</h1>
